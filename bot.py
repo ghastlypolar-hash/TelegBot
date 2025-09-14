@@ -7,6 +7,9 @@ from flask import Flask
 from telegram import Update
 from telegram.ext import ApplicationBuilder, CommandHandler, ContextTypes
 
+PROXY = {
+    "http":  "http://customer-Alyssa_6eYpS-sessid-0141822561-sesstime-10:Blackpanther226+@pr.oxylabs.io:7777"
+}
 #BOT_TOKEN = "8382132782:AAEUK3WKhF7HzNlvOLVhl51O500JEE5u8Lg"
 BOT_TOKEN = os.environ.get("BOT_TOKEN")
 WATCHLIST_FILE = "watchlist.json"
@@ -23,14 +26,12 @@ def home():
 def run_flask():
     flask_app.run(host="0.0.0.0", port=8080)
 
-
 # Load or initialize watchlists (per user)
 try:
     with open(WATCHLIST_FILE, "r") as f:
         watchlists = json.load(f)
 except FileNotFoundError:
     watchlists = {}
-
 
 # Save watchlists
 def save_watchlists():
@@ -45,7 +46,7 @@ def fetch_api_status(username):
             "User-Agent": "Mozilla/5.0",
             "Accept": "application/json",
         }
-        r = requests.get(url, headers=headers, timeout=10)
+        r = requests.get(profile_url, headers=headers, timeout=10, proxies=PROXY)
 
         if r.status_code == 200:
             data = r.json()
@@ -197,6 +198,7 @@ if __name__ == "__main__":
     # Start the Telegram bot
 
     app.run_polling()
+
 
 
 
