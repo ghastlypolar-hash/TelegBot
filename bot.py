@@ -46,7 +46,7 @@ def check_account_status(username):
     }
 
     try:
-        r = requests.get(profile_url, headers=headers, timeout=10)
+        r = requests.get(profile_url, headers=headers, timeout=10, proxies=PROXY)
         page_text = r.text.lower()
 
         # Case 1: Direct 404 response
@@ -170,6 +170,7 @@ if __name__ == "__main__":
     # Start the Telegram bot
 
     app.run_polling()
+
 
 
 
