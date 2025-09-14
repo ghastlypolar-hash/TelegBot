@@ -38,42 +38,22 @@ def save_watchlists():
     with open(WATCHLIST_FILE, "w") as f:
         json.dump(watchlists, f)
 
-# --- API Attempt ---
-def fetch_api_status(username):
+def check_account_status(username):
+    profile_url = f"https://www.instagram.com/{username}/"
+    headers = {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)",
+        "Accept-Language": "en-US,en;q=0.9"
+    }
+
     try:
-        url = f"https://i.instagram.com/api/v1/users/web_profile_info/?username={username}"
-        headers = {
-            "User-Agent": "Mozilla/5.0",
-            "Accept": "application/json",
-        }
-        r = requests.get(profile_url, headers=headers, timeout=10, proxies=PROXY)
-
-        if r.status_code == 200:
-            data = r.json()
-            if "user" in data.get("data", {}):
-                return "ACTIVE"
-            else:
-                return "BANNED / NOT FOUND"
-
-        # if not 200 → fallback
-        return None
-    except Exception:
-        return None
-
-# --- Public Scraping Fallback ---
-def fetch_public_status(username):
-    try:
-        profile_url = f"https://www.instagram.com/{username}/"
-        headers = {
-            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)",
-            "Accept-Language": "en-US,en;q=0.9"
-        }
         r = requests.get(profile_url, headers=headers, timeout=10)
         page_text = r.text.lower()
 
+        # Case 1: Direct 404 response
         if r.status_code == 404:
             return "BANNED / NOT FOUND"
 
+        # Case 2: Known unavailable phrases
         unavailable_phrases = [
             "sorry, this page isn't available",
             "the link you followed may be broken",
@@ -83,23 +63,15 @@ def fetch_public_status(username):
         if any(phrase in page_text for phrase in unavailable_phrases):
             return "BANNED / SUSPENDED"
 
+        # Case 3: Check if page contains Instagram profile metadata
         if 'og:title' not in page_text and 'profilepage_' not in page_text:
             return "BANNED / SUSPENDED"
 
+        # ✅ If reached here → profile exists
         return "ACTIVE"
+
     except Exception as e:
         return f"ERROR: {e}"
-
-
-# --- Final wrapper with fallback ---
-def check_account_status(username):
-    # Step 1: Try API first
-    status = fetch_api_status(username)
-    if status is not None:
-        return status
-
-    # Step 2: Fallback to public scrape
-    return fetch_public_status(username)
 
 # Telegram commands
 async def add_account(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -198,6 +170,7 @@ if __name__ == "__main__":
     # Start the Telegram bot
 
     app.run_polling()
+
 
 
 
