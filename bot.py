@@ -1,14 +1,14 @@
 import requests
 import json
 import time
-#import os
+import os
 import threading
 from flask import Flask
 from telegram import Update
 from telegram.ext import ApplicationBuilder, CommandHandler, ContextTypes
 
-BOT_TOKEN = "8382132782:AAEUK3WKhF7HzNlvOLVhl51O500JEE5u8Lg"
-#BOT_TOKEN = os.environ.get("BOT_TOKEN")
+#BOT_TOKEN = "8382132782:AAEUK3WKhF7HzNlvOLVhl51O500JEE5u8Lg"
+BOT_TOKEN = os.environ.get("BOT_TOKEN")
 WATCHLIST_FILE = "watchlist.json"
 CHECK_INTERVAL = 20  # minutes
 
@@ -169,4 +169,5 @@ if __name__ == "__main__":
     threading.Thread(target=run_flask).start()
 
     # Start the Telegram bot
+
     app.run_polling()
