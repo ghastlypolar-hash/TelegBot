@@ -8,7 +8,7 @@ from telegram import Update
 from telegram.ext import ApplicationBuilder, CommandHandler, ContextTypes
 
 PROXY = {
-    "http":  "http://customer-Alyssa_6eYpS-sessid-0141822561-sesstime-10:Blackpanther226+@pr.oxylabs.io:7777"
+    "http":  "https://customer-alyssa_Otu99:Blackpanther212@ca-pr.oxylabs.io:30001"
 }
 #BOT_TOKEN = "8382132782:AAEUK3WKhF7HzNlvOLVhl51O500JEE5u8Lg"
 BOT_TOKEN = os.environ.get("BOT_TOKEN")
@@ -170,6 +170,7 @@ if __name__ == "__main__":
     # Start the Telegram bot
 
     app.run_polling()
+
 
 
 
