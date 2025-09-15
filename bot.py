@@ -17,11 +17,9 @@ CHECK_INTERVAL = 20  # minutes
 
 flask_app = Flask("")
 
-
 @flask_app.route("/")
 def home():
     return "Bot is running!"
-
 
 def run_flask():
     flask_app.run(host="0.0.0.0", port=8080)
@@ -109,7 +107,6 @@ async def remove_account(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text(
             f"{username} not found in your watchlist.")
 
-
 async def list_accounts(update: Update, context: ContextTypes.DEFAULT_TYPE):
     chat_id = str(update.effective_chat.id)
     if chat_id not in watchlists or not watchlists[chat_id]:
@@ -118,7 +115,6 @@ async def list_accounts(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text("📌 Your Watchlist:\n" +
                                         "\n".join(watchlists[chat_id]))
 
-
 async def check_account(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not context.args:
         await update.message.reply_text("Usage: /check username")
@@ -126,7 +122,6 @@ async def check_account(update: Update, context: ContextTypes.DEFAULT_TYPE):
     username = context.args[0].lower()
     status = check_account_status(username)
     await update.message.reply_text(f"🔎 {username} → {status}")
-
 
 # Background monitoring
 async def monitor_accounts(context: ContextTypes.DEFAULT_TYPE):
@@ -138,7 +133,6 @@ async def monitor_accounts(context: ContextTypes.DEFAULT_TYPE):
                     chat_id=int(chat_id),
                     text=f"⚠ ALERT: {username} is {status}")
 
-
 # Store chat IDs whenever someone interacts with the bot
 async def register_chat(update: Update, context: ContextTypes.DEFAULT_TYPE):
     chat_id = update.effective_chat.id
@@ -146,7 +140,6 @@ async def register_chat(update: Update, context: ContextTypes.DEFAULT_TYPE):
         context.application.bot_data["chat_ids"] = []
     if chat_id not in context.application.bot_data["chat_ids"]:
         context.application.bot_data["chat_ids"].append(chat_id)
-
 
 # Main
 app = ApplicationBuilder().token(BOT_TOKEN).build()
@@ -168,8 +161,8 @@ if __name__ == "__main__":
     threading.Thread(target=run_flask).start()
 
     # Start the Telegram bot
-
     app.run_polling()
+
 
 
 
