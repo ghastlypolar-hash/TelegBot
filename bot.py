@@ -2,7 +2,6 @@ import requests
 import json
 import time
 import os
-import threading
 from flask import Flask
 from telegram import Update
 from telegram.ext import ApplicationBuilder, CommandHandler, ContextTypes
@@ -148,11 +147,14 @@ app.job_queue.run_repeating(monitor_accounts,
                             first=10)
 
 if __name__ == "__main__":
-    # Start Flask server in another thread
-    threading.Thread(target=run_flask).start()
+    # Start Flask in background
+    import threading
+    threading.Thread(target=lambda: flask_app.run(host="0.0.0.0", port=8080)).start()
 
-    # Start the Telegram bot
+    # Start Telegram bot (main process)
     app.run_polling()
+
+
 
 
 
