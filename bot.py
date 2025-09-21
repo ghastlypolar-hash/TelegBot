@@ -34,10 +34,12 @@ def save_watchlists():
         json.dump(watchlists, f)
 
 def check_account_status(username):
-    url = f"https://api.apify.com/v2/acts/apify~instagram-scraper/run-sync?token={APIFY_TOKEN}"
+    url = f"https://api.apify.com/v2/acts/apify~instagram-scraper/run-sync-get-dataset-items?token={APIFY_TOKEN}"
     payload = {
-        "usernames": [username],
-        "resultsLimit": 1
+        "input": {
+            "usernames": [username],
+            "resultsLimit": 1
+        }
     }
 
     try:
@@ -153,6 +155,7 @@ if __name__ == "__main__":
 
     # Start Telegram bot (main process)
     app.run_polling()
+
 
 
 
