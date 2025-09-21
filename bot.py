@@ -3,6 +3,7 @@ import json
 import time
 import os
 from flask import Flask
+from flask import request
 from telegram import Update
 from telegram.ext import ApplicationBuilder, CommandHandler, ContextTypes
 
@@ -148,13 +149,14 @@ app.job_queue.run_repeating(monitor_accounts,
                             interval=CHECK_INTERVAL * 60,
                             first=10)
 
-if __name__ == "__main__":
-    # Start Flask in background
-    import threading
-    threading.Thread(target=lambda: flask_app.run(host="0.0.0.0", port=8080)).start()
+@flask_app.route(f"/{BOT_TOKEN}", methods=["POST"])
+def webhook():
+    update = Update.de_json(request.get_json(force=True), app.bot)
+    app.update_queue.put(update)
+    return "ok"
 
-    # Start Telegram bot (main process)
-    app.run_polling()
+if __name__ == "__main__":
+    flask_app.run(host="0.0.0.0", port=8080)
 
 
 
