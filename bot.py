@@ -7,11 +7,9 @@ from flask import Flask
 from telegram import Update
 from telegram.ext import ApplicationBuilder, CommandHandler, ContextTypes
 
-PROXY = {
-    "http":  "https://customer-alyssa_Otu99:Blackpanther212@ca-pr.oxylabs.io:30001"
-}
 #BOT_TOKEN = "8382132782:AAEUK3WKhF7HzNlvOLVhl51O500JEE5u8Lg"
 BOT_TOKEN = os.environ.get("BOT_TOKEN")
+APIFY_TOKEN = os.environ.get("APIFY_TOKEN")
 WATCHLIST_FILE = "watchlist.json"
 CHECK_INTERVAL = 20  # minutes
 
@@ -37,36 +35,29 @@ def save_watchlists():
         json.dump(watchlists, f)
 
 def check_account_status(username):
-    profile_url = f"https://www.instagram.com/{username}/"
-    headers = {
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)",
-        "Accept-Language": "en-US,en;q=0.9"
+    url = f"https://api.apify.com/v2/acts/apify~instagram-scraper/run-sync?token={APIFY_TOKEN}"
+    payload = {
+        "usernames": [username],
+        "resultsLimit": 1
     }
 
     try:
-        r = requests.get(profile_url, headers=headers, timeout=10, proxies=PROXY)
-        page_text = r.text.lower()
+        r = requests.post(url, json=payload, timeout=30)
+        data = r.json()
 
-        # Case 1: Direct 404 response
-        if r.status_code == 404:
-            return "BANNED / NOT FOUND"
+        # Error handling from API
+        if "error" in data:
+            return f"ERROR: {data['error']['message']}"
 
-        # Case 2: Known unavailable phrases
-        unavailable_phrases = [
-            "sorry, this page isn't available",
-            "the link you followed may be broken",
-            "page may have been removed",
-            "page isn&#39;t available"
-        ]
-        if any(phrase in page_text for phrase in unavailable_phrases):
-            return "BANNED / SUSPENDED"
+        # Parse result
+        if "instagramScraper" in data and data["instagramScraper"]:
+            profile = data["instagramScraper"][0]
 
-        # Case 3: Check if page contains Instagram profile metadata
-        if 'og:title' not in page_text and 'profilepage_' not in page_text:
-            return "BANNED / SUSPENDED"
+            # If we can fetch profile data → ACTIVE
+            if profile.get("followersCount") is not None or profile.get("username"):
+                return "ACTIVE"
 
-        # ✅ If reached here → profile exists
-        return "ACTIVE"
+        return "BANNED / SUSPENDED"
 
     except Exception as e:
         return f"ERROR: {e}"
@@ -162,6 +153,7 @@ if __name__ == "__main__":
 
     # Start the Telegram bot
     app.run_polling()
+
 
 
 
